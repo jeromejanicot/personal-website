@@ -10,35 +10,35 @@ import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote';
 import { serialize } from 'next-mdx-remote/serialize';
 import { FMDataType } from '../../types/types';
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter';
+import { Box } from '../../components/Page';
+import { MDXProvider } from '@mdx-js/react';
+import rehypeHighlight from 'rehype-highlight'
+import rehypeCodeTitles from 'rehype-code-titles'
+import rehypeSlug from 'rehype-slug'
+import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 
 type Props = {
-    mdxSource: MDXRemoteSerializeResult;
+    mdxSource: string;
     frontMatter: FMDataType;
 };
 
-const Article = ({ mdxSource, frontMatter }: Props) => {
+const Article = (props: Props) => {
     const router = useRouter();
+    const { source, frontMatter } = props;
 
     if (!router.isFallback && !frontMatter.slug) {
         return <ErrorPage statusCode={404} />;
     }
 
-    console.log(frontMatter);
-
     const components = {
         Title: () => <h1>{frontMatter.title}</h1>,
         PublishedOn: () => <div>{frontMatter.publishedOn}</div>,
+        Box: Box,
     };
 
     return (
         <>
-            <main>
-                <MDXRemote
-                    {...mdxSource}
-                    components={components}
-                    scope={{ ...frontMatter }}
-                />
-            </main>
+            <MDXRemote {...source} components={{Box}} />
         </>
     );
 };
@@ -59,13 +59,25 @@ export const getStaticProps = async (ctx: GetStaticPropsContext) => {
     const { content, data } = matter(source);
 
     const mdxSource = await serialize(content, {
-        scope: data,
-        parseFrontmatter: true,
+        mdxOptions: {
+            rehypePlugins: [
+                rehypeSlug,
+                [
+                    rehypeAutolinkHeadings,
+                    {
+                        properties: { className: ['anchor'] },
+                    },
+                    { behaviour: 'wrap' },
+                ],
+                rehypeHighlight,
+                rehypeCodeTitles,
+            ],
+        },
     });
 
     return {
         props: {
-            mdxSource: mdxSource,
+            source: mdxSource,
             frontMatter: data,
         },
     };
