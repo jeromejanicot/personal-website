@@ -6,6 +6,16 @@ const withMDX = nextMDX({
   compiler: {
     styledComponents: true,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "images.pexels.com",
+        port: "",
+        pathname: "/photos/**",
+      },
+    ],
+  },
   reactStrictMode: true,
   async redirects() {
     return [
