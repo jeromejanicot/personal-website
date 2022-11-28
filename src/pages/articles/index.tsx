@@ -18,7 +18,7 @@ interface Props {
   allArticles: SlugItemType[];
 }
 
-export default function Articles(props: Props){
+export default function Articles(props: Props) {
   const { allArticles } = props;
   const [pageData, setPageData] = useState<SlugItemType[][]>();
   const [length, setLength] = useState<number>(0);
@@ -94,7 +94,7 @@ export default function Articles(props: Props){
         <div className={`${styles.article_card_container}`}>
           <h1>No articles found</h1>
         </div>
-        <div>
+        <div className={`${styles.filter_navigation_container}`}>
           <ArticlesFilters />
           <PageNav
             length={length}
@@ -107,7 +107,7 @@ export default function Articles(props: Props){
       </div>
     </div>
   );
-};
+}
 
 export const getStaticProps: GetStaticProps = async () => {
   const allArticles = articleFilesPaths.map((filePath) => {
