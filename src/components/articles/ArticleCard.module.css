@@ -1,12 +1,13 @@
 .card {
-  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 50px;
+}
+
+.card_content {
+  max-width: 90%;
   height: min-content;
-  padding: 15px 20px 20px 20px;
-  border-radius: 5pt;
-  margin-bottom: 20px;
-  box-shadow: rgba(6, 24, 44, 0.4) 0px 0px 0px 2px,
-    rgba(6, 24, 44, 0.65) 0px 4px 6px -1px,
-    rgba(255, 255, 255, 0.08) 0px 1px 0px inset;
+  margin-bottom: 25px;
 }
 
 .article_card_title {
@@ -47,4 +48,13 @@
 
 .read_more:hover {
   text-decoration: underline;
+}
+
+.divider {
+  width: 60%;
+  border-bottom: 1px solid black;
+}
+
+.card:hover .divider {
+  border-bottom: 2px solid black;
 }
