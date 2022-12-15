@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useLayoutEffect, useMemo } from "react";
 import { SlugItemType } from "../../types/types";
 import { useEffect, useState } from "react";
 import { GetStaticProps } from "next";
@@ -20,53 +20,39 @@ interface Props {
 
 export default function Articles(props: Props) {
   const { allArticles } = props;
+  const [processArticles, setProcessArticles] = useState(allArticles);
   const [pageData, setPageData] = useState<SlugItemType[][]>();
   const [length, setLength] = useState<number>(0);
   const date = useStore((state) => state.date);
-  const web = useStore((state) => state.web);
-  const design = useStore((state) => state.design);
-  const engineering = useStore((state) => state.engineering);
-  //const page = useStore((state) => state.page);
-  //const perPage = useStore((state) => state.perPage);
+  const filtersStore = useStore((state) => state.filters);
+
+  let filters = useMemo(() => filtersStore, [filtersStore]);
 
   const { page, setPage, perPage, increasePage, decreasePage } = useStore();
+
+  useCallback(() => {
+    let datedArticles = dateSorter(allArticles, date);
+    setProcessArticles(datedArticles);
+  }, [date]);
+
+  useCallback(() => {
+    let filteredArticles = processArticles.filter((article) =>
+      filters.every((filter) => article.data.tags.includes(filter))
+    );
+    setProcessArticles(filteredArticles);
+  }, [filters]);
+
+  if (pageData?.length) {
+    setLength(pageData.length);
+  }
 
   useEffect(() => {
     window.addEventListener("beforeunload", checkboxClean);
 
-    const filteredArticles = ((): SlugItemType[] => {
-      const dateSortedArticles = dateSorter(allArticles, date);
+    setPageData(paginateData(processArticles, perPage));
+  }, [processArticles, perPage]);
 
-      let filters: string[] = [];
-
-      if (web) {
-        filters.push("web");
-      }
-      if (engineering) {
-        filters.push("engineering");
-      }
-
-      if (design) {
-        filters.push("design");
-      }
-
-      let filteredArticles: SlugItemType[];
-      if (web || engineering || design) {
-        return (filteredArticles = dateSortedArticles.filter((article) =>
-          filters.every((filter) => article.data.tags.includes(filter))
-        ));
-      }
-
-      return dateSortedArticles;
-    })();
-
-    setPageData(paginateData(filteredArticles, perPage));
-    if (pageData?.length) {
-      setLength(pageData.length);
-    }
-  }, [date, web, engineering, design, allArticles]);
-
-  return pageData !== undefined && pageData[page] !== undefined ? (
+  return pageData && pageData[page] ? (
     <div className={`${styles.articles_page_container}`}>
       <div className={`${styles.cards_filters_container}`}>
         <div className={`${styles.article_card_container}`}>

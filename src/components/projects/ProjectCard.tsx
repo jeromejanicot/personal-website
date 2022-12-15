@@ -13,7 +13,6 @@ const ProjectCard = ({ project }: Props) => {
       <div className={`${styles.project_header}`}>
         {/* need to host my own images somewhere not to annyoing bc of loader for this one
           src="https://images.pexels.com/photos/2529973/pexels-photo-2529973.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260" */}
-
         <img
           src="https://images.pexels.com/photos/2529973/pexels-photo-2529973.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260"
           alt=""

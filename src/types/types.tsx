@@ -28,14 +28,15 @@ export interface FrontmatterFields {
   tags: string[];
 }
 
+export type Filters = "web" | "design" | "engineering";
+
 export interface FilterType {
   page: number;
   perPage: number;
   date: boolean;
-  web: boolean;
-  engineering: boolean;
-  design: boolean;
-  setTags: (input: keyof FilterType) => void;
+  filters: Array<Filters>;
+  addTags: (input: Filters) => void;
+  rmTags: (input: Filters) => void;
   setDate: (input: boolean) => void;
   setPage: (page: number) => void;
   increasePage: () => void;

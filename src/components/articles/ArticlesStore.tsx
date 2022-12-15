@@ -1,17 +1,23 @@
 import create from "zustand";
-import { FilterType } from "../../types/types";
+import { FilterType, Filters } from "../../types/types";
 import React from "react";
+import ArticlesFilters from "./ArticlesFilters";
+import { takeCoverage } from "v8";
 
-const useStore = create<FilterType>((set) => ({
+const useStore = create<FilterType>((set, get) => ({
   page: 0,
   perPage: 5,
   date: true,
-  web: false,
-  engineering: false,
-  design: false,
-  setTags: (id: keyof FilterType) =>
+  filters: new Array(),
+  addTags: (id) =>
     set((state) => ({
-      [id]: !state[id],
+      filters: { ...state.filters, id },
+    })),
+  rmTags: (id) =>
+    set((state) => ({
+      filters: {
+        ...state.filters.filter((tag) => (tag !== id ? tag : "")),
+      },
     })),
   setDate: (input: boolean) =>
     set(() => ({
