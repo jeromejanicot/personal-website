@@ -1,14 +1,11 @@
 import create from "zustand";
-import { FilterType, Filters } from "../../types/types";
-import React from "react";
-import ArticlesFilters from "./ArticlesFilters";
-import { takeCoverage } from "v8";
+import { FilterType } from "../../types/types";
 
-const useStore = create<FilterType>((set, get) => ({
+const useStore = create<FilterType>((set) => ({
   page: 0,
   perPage: 5,
   date: true,
-  filters: new Array(),
+  filters: [],
   addTags: (id) =>
     set((state) => ({
       filters: { ...state.filters, id },

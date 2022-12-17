@@ -1,5 +1,5 @@
-import React, { useCallback, useLayoutEffect, useMemo } from "react";
-import { SlugItemType } from "../../types/types";
+import React, { useMemo } from "react";
+import { Filters, SlugItemType } from "../../types/types";
 import { useEffect, useState } from "react";
 import { GetStaticProps } from "next";
 import ArticleCard from "./../../components/articles/ArticleCard";
@@ -11,46 +11,59 @@ import { useStore } from "../../components/articles/ArticlesStore";
 import { dateSorter, checkboxClean } from "../../lib/filterUtils";
 import { paginateData } from "../../lib/usePagination";
 import styles from "../../components/articles/Articles.module.css";
-import ArticlesFilters from "../../components/articles/ArticlesFilters";
+import FilterComponent from "../../components/Filters";
 import PageNav from "../../components/PageNav";
 
 interface Props {
   allArticles: SlugItemType[];
 }
 
+const filtersList: Filters[] = ["web", "design", "engineering"];
+
 export default function Articles(props: Props) {
   const { allArticles } = props;
-  const [processArticles, setProcessArticles] = useState(allArticles);
   const [pageData, setPageData] = useState<SlugItemType[][]>();
   const [length, setLength] = useState<number>(0);
-  const date = useStore((state) => state.date);
-  const filtersStore = useStore((state) => state.filters);
+  const {
+    date,
+    setDate,
+    page,
+    setPage,
+    perPage,
+    increasePage,
+    decreasePage,
+    addTags,
+    rmTags,
+    filters,
+  } = useStore();
 
-  let filters = useMemo(() => filtersStore, [filtersStore]);
+  const memoDateSorted = useMemo(
+    () => dateSorter(allArticles, date),
+    [allArticles, date]
+  );
 
-  const { page, setPage, perPage, increasePage, decreasePage } = useStore();
-
-  useCallback(() => {
-    let datedArticles = dateSorter(allArticles, date);
-    setProcessArticles(datedArticles);
-  }, [date]);
-
-  useCallback(() => {
-    let filteredArticles = processArticles.filter((article) =>
-      filters.every((filter) => article.data.tags.includes(filter))
-    );
-    setProcessArticles(filteredArticles);
-  }, [filters]);
-
-  if (pageData?.length) {
-    setLength(pageData.length);
+  if (Array.isArray(filters)) {
+    console.log("filters is an array");
   }
+
+  const memoFilterSorted = useMemo(
+    () =>
+      memoDateSorted.filter((article) =>
+        filters.every((filter) => article.data.tags.includes(filter))
+      ),
+    [memoDateSorted, filters]
+  );
+
+  const memoPages = useMemo(
+    () => Math.ceil(memoFilterSorted.length / perPage),
+    [memoFilterSorted, perPage]
+  );
 
   useEffect(() => {
     window.addEventListener("beforeunload", checkboxClean);
-
-    setPageData(paginateData(processArticles, perPage));
-  }, [processArticles, perPage]);
+    setPageData(paginateData(memoFilterSorted, perPage));
+    setLength(memoPages);
+  }, [memoFilterSorted, perPage, memoPages]);
 
   return pageData && pageData[page] ? (
     <div className={`${styles.articles_page_container}`}>
@@ -63,7 +76,14 @@ export default function Articles(props: Props) {
           ))}
         </div>
         <div>
-          <ArticlesFilters />
+          <FilterComponent
+            setDate={setDate}
+            filtersList={filtersList}
+            activeFilters={filters}
+            addTags={addTags}
+            rmTags={rmTags}
+          />
+
           <PageNav
             length={length}
             page={page}
@@ -81,7 +101,13 @@ export default function Articles(props: Props) {
           <h1>No articles found</h1>
         </div>
         <div className={`${styles.filter_navigation_container}`}>
-          <ArticlesFilters />
+          <FilterComponent
+            setDate={setDate}
+            filtersList={filtersList}
+            activeFilters={filters}
+            addTags={addTags}
+            rmTags={rmTags}
+          />
           <PageNav
             length={length}
             page={page}

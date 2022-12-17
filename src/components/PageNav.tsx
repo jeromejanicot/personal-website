@@ -17,7 +17,6 @@ const PageNav = ({
   increasePage,
   decreasePage,
 }: Props) => {
-  console.log(page);
   return (
     <div className={`${styles.page_navigation_container}`}>
       <button
