@@ -65,6 +65,8 @@ export default function Articles(props: Props) {
     setLength(memoPages);
   }, [memoFilterSorted, perPage, memoPages]);
 
+  console.debug(filters);
+
   return pageData && pageData[page] ? (
     <div className={`${styles.articles_page_container}`}>
       <div className={`${styles.cards_filters_container}`}>

@@ -25,7 +25,7 @@ export interface FrontmatterFields {
   date: number;
   publishedOn: string;
   preview: string;
-  tags: string[];
+  tags: Filters[];
 }
 
 export type Filters = "web" | "design" | "engineering";
