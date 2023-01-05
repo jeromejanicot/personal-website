@@ -5,12 +5,14 @@ const useStore = create<FilterType>((set) => ({
   page: 0,
   perPage: 5,
   date: true,
-  web: false,
-  engineering: false,
-  design: false,
-  setTags: (id: keyof FilterType ) =>
+  filters: new Array(),
+  addTags: (id) =>
     set((state) => ({
-      [id]: !state[id],
+      filters: [...state.filters, id],
+    })),
+  rmTags: (id) =>
+    set((state) => ({
+      filters: [...state.filters.filter((tag) => (tag !== id ? tag : ""))],
     })),
   setDate: (input: boolean) =>
     set(() => ({

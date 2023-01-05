@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import ProjectCard from "../../components/projects/ProjectCard";
-import { SlugItemType, FrontmatterFields } from "../../types/types";
+import { Filters, SlugItemType } from "../../types/types";
 import { GetStaticProps } from "next";
 import { projectsDirectory, projectFilesPaths } from "../../lib/getBlog";
 import path from "path";
 import fs from "fs";
 import matter from "gray-matter";
-import ProjectsFilters from "../../components/projects/ProjectsFilters";
+import FilterComponent from "../../components/Filters";
 import { paginateData } from "../../lib/usePagination";
 import { useStore } from "../../components/projects/ProjectsStore";
 import { dateSorter, checkboxClean } from "../../lib/filterUtils";
@@ -17,56 +17,52 @@ interface Props {
   allProjects: SlugItemType[];
 }
 
-export default function Projects(props: Props){
+const filtersList: Filters[] = ["web", "design", "engineering"];
+
+export default function Projects(props: Props) {
   const { allProjects } = props;
   const [pageData, setPageData] = useState<SlugItemType[][]>();
   const [length, setLength] = useState<number>(0);
-
   const {
-    page,
-    perPage,
     date,
-    web,
-    design,
-    engineering,
+    setDate,
+    page,
     setPage,
+    perPage,
     increasePage,
     decreasePage,
+    addTags,
+    rmTags,
+    filters,
   } = useStore();
+
+  const memoDateSorted = useMemo(
+    () => dateSorter(allProjects, date),
+    [allProjects, date]
+  );
+
+  if (Array.isArray(filters)) {
+    console.log("filters is an array");
+  }
+
+  const memoFilterSorted = useMemo(
+    () =>
+      memoDateSorted.filter((project) =>
+        filters.every((filter) => project.data.tags.includes(filter))
+      ),
+    [memoDateSorted, filters]
+  );
+
+  const memoPages = useMemo(
+    () => Math.ceil(memoFilterSorted.length / perPage),
+    [memoFilterSorted, perPage]
+  );
 
   useEffect(() => {
     window.addEventListener("beforeunload", checkboxClean);
-
-    const filteredProjects = ((): SlugItemType[] => {
-      const dateSortedProjects = dateSorter(allProjects, date);
-
-      let filters: string[] = [];
-
-      if (web) {
-        filters.push("web");
-      }
-      if (engineering) {
-        filters.push("engineering");
-      }
-      if (design) {
-        filters.push("design");
-      }
-
-      let filteredProjects: SlugItemType[];
-      if (web || engineering || design) {
-        return (filteredProjects = dateSortedProjects.filter((article) =>
-          filters.every((filter) => article.data.tags.includes(filter))
-        ));
-      }
-
-      return dateSortedProjects;
-    })();
-
-    setPageData(paginateData(filteredProjects, perPage));
-    if (pageData !== undefined) {
-      setLength(pageData.length);
-    }
-  }, [date, web, engineering, design, allProjects]);
+    setPageData(paginateData(memoFilterSorted, perPage));
+    setLength(memoPages);
+  }, [memoFilterSorted, perPage, memoPages]);
 
   return pageData !== undefined && pageData[page] !== undefined ? (
     <div className={`${styles.projects_page_container}`}>
@@ -79,7 +75,13 @@ export default function Projects(props: Props){
           ))}
         </div>
         <div>
-          <ProjectsFilters />
+          <FilterComponent
+            setDate={setDate}
+            filtersList={filtersList}
+            activeFilters={filters}
+            addTags={addTags}
+            rmTags={rmTags}
+          />
           <PageNav
             length={length}
             page={page}
@@ -97,7 +99,13 @@ export default function Projects(props: Props){
           <h1>No projects found</h1>
         </div>
         <div>
-          <ProjectsFilters />
+          <FilterComponent
+            setDate={setDate}
+            filtersList={filtersList}
+            activeFilters={filters}
+            addTags={addTags}
+            rmTags={rmTags}
+          />
           <PageNav
             length={length}
             page={page}
@@ -109,7 +117,7 @@ export default function Projects(props: Props){
       </div>
     </div>
   );
-};
+}
 
 export const getStaticProps: GetStaticProps = async () => {
   const allProjects = projectFilesPaths.map((filePath) => {
