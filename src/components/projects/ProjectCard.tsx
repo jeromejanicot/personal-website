@@ -27,7 +27,7 @@ const ProjectCard = ({ project }: Props) => {
           }}
         >
           <a className={`${styles.project_card_link}`}>
-            <h3>Project {project.data.title}</h3>
+            <h3>{project.data.title}</h3>
           </a>
         </Link>
 

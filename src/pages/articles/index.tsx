@@ -9,7 +9,7 @@ import fs from "fs";
 import matter from "gray-matter";
 import { useStore } from "../../components/articles/ArticlesStore";
 import { dateSorter, checkboxClean } from "../../lib/filterUtils";
-import { paginateData } from "../../lib/usePagination";
+import { paginateData } from "../../lib/getPagination";
 import styles from "../../components/articles/Articles.module.css";
 import FilterComponent from "../../components/Filters";
 import PageNav from "../../components/PageNav";

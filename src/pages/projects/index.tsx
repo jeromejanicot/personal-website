@@ -7,9 +7,9 @@ import path from "path";
 import fs from "fs";
 import matter from "gray-matter";
 import FilterComponent from "../../components/Filters";
-import { paginateData } from "../../lib/usePagination";
+import { paginateData } from "../../lib/getPagination";
 import { useStore } from "../../components/projects/ProjectsStore";
-import { dateSorter, checkboxClean } from "../../lib/filterUtils";
+import { dateSorter, useFilter } from "../../lib/filterUtils";
 import styles from "../../components/projects/Projects.module.css";
 import PageNav from "../../components/PageNav";
 
@@ -36,33 +36,7 @@ export default function Projects(props: Props) {
     filters,
   } = useStore();
 
-  const memoDateSorted = useMemo(
-    () => dateSorter(allProjects, date),
-    [allProjects, date]
-  );
-
-  if (Array.isArray(filters)) {
-    console.log("filters is an array");
-  }
-
-  const memoFilterSorted = useMemo(
-    () =>
-      memoDateSorted.filter((project) =>
-        filters.every((filter) => project.data.tags.includes(filter))
-      ),
-    [memoDateSorted, filters]
-  );
-
-  const memoPages = useMemo(
-    () => Math.ceil(memoFilterSorted.length / perPage),
-    [memoFilterSorted, perPage]
-  );
-
-  useEffect(() => {
-    window.addEventListener("beforeunload", checkboxClean);
-    setPageData(paginateData(memoFilterSorted, perPage));
-    setLength(memoPages);
-  }, [memoFilterSorted, perPage, memoPages]);
+  useFilter(allProjects, date, filters, perPage, setPageData, setLength);
 
   return pageData !== undefined && pageData[page] !== undefined ? (
     <div className={`${styles.projects_page_container}`}>
