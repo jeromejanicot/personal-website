@@ -16,13 +16,13 @@ export function dateSorter(
     date: boolean,
 ): SlugItemType[] {
     if (date) {
-        return sourceArray.sort(
+        return [...sourceArray.sort(
             (article1, article2) => article2.data.date - article1.data.date,
-        );
+        )];
     } else {
-        return sourceArray.sort(
+        return [...sourceArray.sort(
             (article1, article2) => article1.data.date - article2.data.date,
-        );
+        )];
     }
 }
 
@@ -34,19 +34,21 @@ export const useFilter = (
     setPageData: (arg: any) => void,
     setLength: (arg: number) => void,
 ) => {
+    const memoFilterSorted = useMemo(() => {
+        let value = [...allItems.filter((project) =>
+            filters.every((filter) => project.data.tags.includes(filter)),
+        )];
+        console.log(value);
+        console.log('memoFilterSorted ran');
+        return value;
+    }, [allItems, filters]);
 
-    const memoFilterSorted = useMemo(
-        () =>
-            allItems.filter((project) =>
-                filters.every((filter) => project.data.tags.includes(filter)),
-            ),
-        [allItems, filters],
-    );
-
-    const memoDateSorted = useMemo(
-        () => dateSorter(memoFilterSorted, date),
-        [memoFilterSorted, date],
-    );
+    const memoDateSorted = useMemo(() => {
+        let value = dateSorter(memoFilterSorted, date);
+        console.log(value);
+        console.log('memoDateSorted ran');
+        return value;
+    }, [memoFilterSorted, date]);
 
     const memoPages = useMemo(
         () => Math.ceil(memoFilterSorted.length / perPage),

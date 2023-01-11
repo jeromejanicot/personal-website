@@ -37,6 +37,7 @@ export default function Projects(props: Props) {
   } = useStore();
 
   useFilter(allProjects, date, filters, perPage, setPageData, setLength);
+  console.log(pageData);
 
   return pageData !== undefined && pageData[page] !== undefined ? (
     <div className={`${styles.projects_page_container}`}>
